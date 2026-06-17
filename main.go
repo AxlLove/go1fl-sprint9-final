@@ -15,15 +15,16 @@ const (
 // generateRandomElements generates random elements.
 func generateRandomElements(size int) []int {
 	if size <= 0 {
-		return []int{}
+		return nil
 	}
 
 	slice := make([]int, 0, size)
 	src := rand.NewSource(time.Now().Unix())
+	r := rand.New(src)
 
 	for i := 0; i < size; i++ {
-		randNum := src.Int63()
-		slice = append(slice, int(randNum))
+		randNum := r.Int()
+		slice = append(slice, randNum)
 	}
 
 	return slice
@@ -52,10 +53,9 @@ func maxChunks(data []int) int {
 	if len(data) < CHUNKS {
 		return maximum(data)
 	}
-	result := make([]int, 0, CHUNKS)
+	result := make([]int, CHUNKS)
 	chunkSize := len(data) / CHUNKS
 	var wg sync.WaitGroup
-	mu := &sync.Mutex{}
 
 	wg.Add(CHUNKS)
 	for i := range CHUNKS {
@@ -67,13 +67,11 @@ func maxChunks(data []int) int {
 
 		slice := data[start:end]
 
-		go func(slice []int) {
+		go func(slice []int, i int) {
 			maxNum := maximum(slice)
-			mu.Lock()
-			result = append(result, maxNum)
-			mu.Unlock()
+			result[i] = maxNum
 			wg.Done()
-		}(slice)
+		}(slice, i)
 	}
 	wg.Wait()
 	return maximum(result)

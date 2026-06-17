@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -8,15 +9,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Пишите тесты в этом файле
 func TestGenerateRandomElements(t *testing.T) {
-	slice := generateRandomElements(0)
-	assert.Empty(t, slice)
+	for _, size := range []int{0, -1} {
+		t.Run(fmt.Sprintf("size=%d", size), func(t *testing.T) {
+			assert.Empty(t, generateRandomElements(size))
+		})
+	}
 
-	slice = generateRandomElements(-1)
-	assert.Empty(t, slice)
-
-	slice = generateRandomElements(10)
+	slice := generateRandomElements(10)
 	require.Len(t, slice, 10)
 
 	time.Sleep(1 * time.Second)
@@ -26,24 +26,22 @@ func TestGenerateRandomElements(t *testing.T) {
 }
 
 func TestMaximum(t *testing.T) {
-	var slice []int
-	maxNum := maximum(slice)
-	require.Equal(t, 0, maxNum)
-
-	slice = []int{
-		1,
-		253,
-		32,
-		600,
-		250,
-		599,
+	tests := []struct {
+		name     string
+		input    []int
+		expected int
+	}{
+		{"nil слайс", nil, 0},
+		{"пустой слайс", []int{}, 0},
+		{"один элемент", []int{42}, 42},
+		{"максимум в начале", []int{600, 1, 253}, 600},
+		{"максимум в середине", []int{1, 600, 253}, 600},
+		{"максимум в конце", []int{1, 253, 600}, 600},
 	}
 
-	maxNum = maximum(slice)
-
-	assert.Equal(t, 600, maxNum)
-
-	slice = []int{1}
-	maxNum = maximum(slice)
-	assert.Equal(t, 1, maxNum)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, maximum(tt.input))
+		})
+	}
 }
